@@ -46,3 +46,32 @@ for i in range(1,25):
     book = {"id":i, "title": fakeTitle, "author": fakeAuthor, "isbn": fakeISBN}
     # add the new random "fake" book using the API
     addBook(book, apiKey) 
+def getBooks(apiKey):
+    r = requests.get(
+        f"{APIHOST}/api/v1/books",
+        headers={"X-API-Key": apiKey}
+    )
+    if r.status_code == 200:
+        return r.json()
+    else:
+        raise Exception(f"Failed to fetch books: {r.status_code}, {r.text}")
+
+def deleteBook(bookId, apiKey):
+    r = requests.delete(
+        f"{APIHOST}/api/v1/books/{bookId}",
+        headers={"X-API-Key": apiKey}
+    )
+    if r.status_code == 200:
+        print(f"Deleted book ID: {bookId}")
+    else:
+        raise Exception(f"Failed to delete book {bookId}: {r.status_code}, {r.text}")
+
+# Fetch all books
+books = getBooks(apiKey)
+
+# Delete first 5 and last 5 books
+if len(books) >= 10:
+    for book in books[:5] + books[-5:]:
+        deleteBook(book["id"], apiKey)
+else:
+    print("Not enough books to delete first and last five.")
